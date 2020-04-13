@@ -1,0 +1,3 @@
+rootProject.name='Secp256K1App'
+include ':app'
+include ':secp256k1android'
