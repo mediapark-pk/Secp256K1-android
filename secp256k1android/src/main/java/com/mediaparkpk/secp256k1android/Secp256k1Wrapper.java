@@ -1,11 +1,13 @@
 package com.mediaparkpk.secp256k1android;
 
 public class Secp256k1Wrapper {
-    public native byte[] publicKey(byte[] privateKey);
+    public native byte[] createPublicKey(byte[] privateKey);
+
+    public native byte[] publicKey(boolean compressed);
 
     public native byte[] stringToBytes(String s);
 
-    public native String bytesToHex(byte[] b);
+    public native String bytesToHex(byte[] b, int size);
 
     public native int fingerprint();
 
