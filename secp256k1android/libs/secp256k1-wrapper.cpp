@@ -31,29 +31,66 @@ Java_com_mediaparkpk_secp256k1android_Secp256k1Wrapper_stringToBytes(JNIEnv *env
 
 JNIEXPORT jstring JNICALL
 Java_com_mediaparkpk_secp256k1android_Secp256k1Wrapper_bytesToHex(JNIEnv *env, jobject bytesObj,
-                                                                  jbyteArray b) {
+                                                                  jbyteArray b, jint size) {
     const unsigned char *bytes = (const unsigned char *) env->GetByteArrayElements(b, nullptr);
 //    const unsigned char * bytes  = (const unsigned char*)env->GetDirectBufferAddress(b);
     auto byteString = Secp256K1::base16Encode((const char *) bytes);
+    byteString.resize(size * 2);
+    assert (byteString.size() == size * 2);
     return env->NewStringUTF(byteString.c_str());
 }
 
+/**
+ * @brief creates public key from given bytes(private key) and returns it in uncompressed form
+ * @param env
+ * @param byteObj
+ * @param privKeyBytes
+ * @return public key byte[]
+ */
 JNIEXPORT jbyteArray JNICALL
-Java_com_mediaparkpk_secp256k1android_Secp256k1Wrapper_publicKey(JNIEnv *env,
-                                                                 jobject byteObj /* this */,
-                                                                 jbyteArray privKeyBytes) {
+Java_com_mediaparkpk_secp256k1android_Secp256k1Wrapper_createPublicKey(JNIEnv *env,
+                                                                       jobject byteObj /* this */,
+                                                                       jbyteArray privKeyBytes) {
     auto instance = Secp256K1::getInstance();
     const unsigned char *bytes = (const unsigned char *) env->GetByteArrayElements(privKeyBytes,
                                                                                    nullptr);
     std::vector<uint8_t> priv(32);
     priv.assign(bytes, bytes + 32);
     instance->createPublicKeyFromPriv(priv);
-
     auto pubKey = instance->uncompressedPublicKey();
     unsigned char *pbKey = pubKey.data();
     auto size = pubKey.size();
+    assert(size == 65);
     jbyteArray ret = env->NewByteArray(size);
-    env->SetByteArrayRegion(ret, 0, size, (jbyte*) pbKey);
+    env->SetByteArrayRegion(ret, 0, size, (jbyte *) pbKey);
+
+    return ret;
+}
+
+/**
+ * @brief returns public key in compressed/uncompressed form
+ * @param env
+ * @param byteObj
+ * @param compressed whether public key should be compressed or uncompressed
+ * @return byte[] public key
+ */
+JNIEXPORT jbyteArray JNICALL
+Java_com_mediaparkpk_secp256k1android_Secp256k1Wrapper_publicKey(JNIEnv *env,
+                                                                 jobject byteObj /* this */,
+                                                                 jboolean compressed) {
+    auto instance = Secp256K1::getInstance();
+    std::vector<uint8_t> pubKey;
+    if (compressed) {
+        pubKey = instance->publicKey();
+    } else {
+        pubKey = instance->uncompressedPublicKey();
+    }
+
+    unsigned char *pbKey = pubKey.data();
+    auto size = pubKey.size();
+
+    jbyteArray ret = env->NewByteArray(size);
+    env->SetByteArrayRegion(ret, 0, size, (jbyte *) pbKey);
 
     return ret;
 }
@@ -80,24 +117,24 @@ Java_com_mediaparkpk_secp256k1android_Secp256k1Wrapper_privateKey(JNIEnv *env,
 
 JNIEXPORT jbyteArray JNICALL
 Java_com_mediaparkpk_secp256k1android_Secp256k1Wrapper_privateKeyTweakAdd(JNIEnv *env,
-                                                                  jobject byteObj /* this */,
-                                                                  jbyteArray key,
-                                                                  jint keySize,
-                                                                  jbyteArray tweak,
-                                                                  jint tweakSize) {
+                                                                          jobject byteObj /* this */,
+                                                                          jbyteArray key,
+                                                                          jint keySize,
+                                                                          jbyteArray tweak,
+                                                                          jint tweakSize) {
     auto instance = Secp256K1::getInstance();
 
     const unsigned char *keyBytes = (const unsigned char *) env->GetByteArrayElements(key,
-                                                                                   nullptr);
+                                                                                      nullptr);
     const unsigned char *tweakBytes = (const unsigned char *) env->GetByteArrayElements(tweak,
-                                                                                   nullptr);
+                                                                                        nullptr);
     std::vector<uint8_t> vKey(keyBytes, keyBytes + keySize);
     std::vector<uint8_t> vTweak(tweakBytes, tweakBytes + tweakSize);
 
     bool result = instance->privKeyTweakAdd(vKey, vTweak);
     if (result) {
         jbyteArray ret = env->NewByteArray(keySize);
-        env->SetByteArrayRegion(ret, 0, keySize, (jbyte*)vKey.data());
+        env->SetByteArrayRegion(ret, 0, keySize, (jbyte *) vKey.data());
         return ret;
     }
 }
