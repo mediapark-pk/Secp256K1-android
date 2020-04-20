@@ -14,8 +14,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Secp256k1Wrapper secp256k1Wrapper = new Secp256k1Wrapper();
         byte[] b = secp256k1Wrapper.stringToBytes("aa9ce7ec21a5655d5b54ac57fa2f0b37d0606967679eef32eff16cc84be8fa9c");
-        byte[] pb = secp256k1Wrapper.publicKey(b);
-        String s = secp256k1Wrapper.bytesToHex(pb);
+        byte[] pb = secp256k1Wrapper.createPublicKey(b);
+        String s = secp256k1Wrapper.bytesToHex(pb, pb.length);
         assert(s == "");
 //        secp256k1Wrapper.publicKey();
 
