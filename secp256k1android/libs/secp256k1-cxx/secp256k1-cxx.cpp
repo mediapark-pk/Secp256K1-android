@@ -419,7 +419,7 @@ int Secp256K1::hexValue(char hex_digit)
 
 std::string Secp256K1::base16Encode(const std::string& input)
 {
-    static constexpr char hex_digits[] = "0123456789ABCDEF";
+    static constexpr char hex_digits[] = "0123456789abcdef";
 
     std::string output;
     output.reserve(input.length() * 2);
