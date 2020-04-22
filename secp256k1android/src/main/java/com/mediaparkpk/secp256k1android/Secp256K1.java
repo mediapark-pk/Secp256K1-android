@@ -2,7 +2,7 @@ package com.mediaparkpk.secp256k1android;
 
 public class Secp256K1 {
 
-    public static Secp256k1Wrapper secp256k1Wrapper;
+    private static Secp256k1Wrapper secp256k1Wrapper= new Secp256k1Wrapper();
 
     public static byte[] createPublicKey(byte[] privateKey) {
         return secp256k1Wrapper.createPublicKey(privateKey);
