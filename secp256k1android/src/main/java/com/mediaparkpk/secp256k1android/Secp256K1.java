@@ -20,7 +20,7 @@ public class Secp256K1 {
         return secp256k1Wrapper.bytesToHex(bytes, size);
     }
 
-    public static int getFingurePrint() {
+    public static int getFingerPrint() {
         return secp256k1Wrapper.fingerprint();
     }
 
